@@ -66,11 +66,12 @@ public class MultiCallAudioFragment extends Fragment implements AVEngineKit.Call
             return;
         }
 
+        initParticipantsView(session);
         updateParticipantStatus(session);
         updateCallDuration();
     }
 
-    private void updateParticipantStatus(AVEngineKit.CallSession session) {
+    private void initParticipantsView(AVEngineKit.CallSession session) {
 
         me = userViewModel.getUserInfo(userViewModel.getUserId(), false);
 
@@ -89,16 +90,26 @@ public class MultiCallAudioFragment extends Fragment implements AVEngineKit.Call
             multiCallItem.setTag(userInfo.uid);
 
             multiCallItem.setLayoutParams(new ViewGroup.LayoutParams(with / 3, with / 3));
-            multiCallItem.getStatusTextView().setText(userInfo.displayName);
+            multiCallItem.getStatusTextView().setText(R.string.connecting);
             GlideApp.with(multiCallItem).load(userInfo.portrait).into(multiCallItem.getPortraitImageView());
+            audioContainerGridLayout.addView(multiCallItem);
+        }
+    }
 
-            if (!me.uid.equals(userInfo.uid)) {
-                PeerConnectionClient client = session.getClient(userInfo.uid);
+    private void updateParticipantStatus(AVEngineKit.CallSession session) {
+        int count = audioContainerGridLayout.getChildCount();
+        String meUid = userViewModel.getUserId();
+        for (int i = 0; i < count; i++) {
+            View view = audioContainerGridLayout.getChildAt(i);
+            String userId = (String) view.getTag();
+            if (meUid.equals(userId)) {
+                ((MultiCallItem) view).getStatusTextView().setVisibility(View.GONE);
+            } else {
+                PeerConnectionClient client = session.getClient(userId);
                 if (client.state == AVEngineKit.CallState.Connected) {
-                    multiCallItem.getStatusTextView().setVisibility(View.GONE);
+                    ((MultiCallItem) view).getStatusTextView().setVisibility(View.GONE);
                 }
             }
-            audioContainerGridLayout.addView(multiCallItem);
         }
     }
 
@@ -146,22 +157,11 @@ public class MultiCallAudioFragment extends Fragment implements AVEngineKit.Call
         // do nothing
     }
 
-    // 自己的状态
     @Override
     public void didChangeState(AVEngineKit.CallState callState) {
+        AVEngineKit.CallSession callSession = AVEngineKit.Instance().getCurrentSession();
         if (callState == AVEngineKit.CallState.Connected) {
-            for (String participant : participants) {
-                PeerConnectionClient client = AVEngineKit.Instance().getCurrentSession().getClient(participant);
-                // 自己时，是空的
-                if (client != null) {
-                    if (client.state == AVEngineKit.CallState.Connected) {
-                        View view = audioContainerGridLayout.findViewWithTag(participant);
-                        ((MultiCallItem) view).getStatusTextView().setVisibility(View.GONE);
-                    }
-                }
-            }
-            View view = audioContainerGridLayout.findViewWithTag(userViewModel.getUserId());
-            ((MultiCallItem) view).getStatusTextView().setVisibility(View.GONE);
+            updateParticipantStatus(callSession);
         } else if (callState == AVEngineKit.CallState.Idle) {
             getActivity().finish();
         }
@@ -187,7 +187,7 @@ public class MultiCallAudioFragment extends Fragment implements AVEngineKit.Call
 
                 multiCallItem.setLayoutParams(new ViewGroup.LayoutParams(with / 3, with / 3));
 
-                multiCallItem.getStatusTextView().setText(info.displayName);
+                multiCallItem.getStatusTextView().setText(R.string.connecting);
                 GlideApp.with(multiCallItem).load(info.portrait).into(multiCallItem.getPortraitImageView());
                 audioContainerGridLayout.addView(multiCallItem, i);
                 break;

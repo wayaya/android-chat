@@ -82,11 +82,12 @@ public class MultiCallVideoFragment extends Fragment implements AVEngineKit.Call
             return;
         }
 
-        updateParticipantStatus(session);
+        initParticipantsView(session);
         updateCallDuration();
+        updateParticipantStatus(session);
     }
 
-    private void updateParticipantStatus(AVEngineKit.CallSession session) {
+    private void initParticipantsView(AVEngineKit.CallSession session) {
         me = userViewModel.getUserInfo(userViewModel.getUserId(), false);
 
         DisplayMetrics dm = getResources().getDisplayMetrics();
@@ -101,14 +102,9 @@ public class MultiCallVideoFragment extends Fragment implements AVEngineKit.Call
             multiCallItem.setTag(userInfo.uid);
 
             multiCallItem.setLayoutParams(new ViewGroup.LayoutParams(with / 3, with / 3));
-            multiCallItem.getStatusTextView().setText(userInfo.displayName);
+            multiCallItem.getStatusTextView().setText(R.string.connecting);
             multiCallItem.setOnClickListener(clickListener);
             GlideApp.with(multiCallItem).load(userInfo.portrait).into(multiCallItem.getPortraitImageView());
-
-            PeerConnectionClient client = session.getClient(userInfo.uid);
-            if (client.state == AVEngineKit.CallState.Connected) {
-                multiCallItem.getStatusTextView().setVisibility(View.GONE);
-            }
             participantLinearLayout.addView(multiCallItem);
         }
 
@@ -123,6 +119,24 @@ public class MultiCallVideoFragment extends Fragment implements AVEngineKit.Call
         focusMultiCallItem = multiCallItem;
         focusVideoUserId = me.uid;
     }
+
+    private void updateParticipantStatus(AVEngineKit.CallSession session) {
+        int count = participantLinearLayout.getChildCount();
+        String meUid = userViewModel.getUserId();
+        for (int i = 0; i < count; i++) {
+            View view = participantLinearLayout.getChildAt(i);
+            String userId = (String) view.getTag();
+            if (meUid.equals(userId)) {
+                ((MultiCallItem) view).getStatusTextView().setVisibility(View.GONE);
+            } else {
+                PeerConnectionClient client = session.getClient(userId);
+                if (client.state == AVEngineKit.CallState.Connected) {
+                    ((MultiCallItem) view).getStatusTextView().setVisibility(View.GONE);
+                }
+            }
+        }
+    }
+
 
     @OnClick(R.id.minimizeImageView)
     void minimize() {
@@ -184,10 +198,15 @@ public class MultiCallVideoFragment extends Fragment implements AVEngineKit.Call
         // do nothing
     }
 
-    // 自己的状态
     @Override
     public void didChangeState(AVEngineKit.CallState callState) {
-        // TODO
+        AVEngineKit.CallSession callSession = AVEngineKit.Instance().getCurrentSession();
+        if (callState == AVEngineKit.CallState.Connected) {
+            updateParticipantStatus(callSession);
+        } else if (callState == AVEngineKit.CallState.Idle) {
+            getActivity().finish();
+        }
+        Toast.makeText(getActivity(), "" + callState.name(), Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -66,7 +66,6 @@ public class MultiCallActivity extends VoipBaseActivity {
         });
     }
 
-    // 自己的状态
     @Override
     public void didChangeState(AVEngineKit.CallState callState) {
         postAction(() -> {
