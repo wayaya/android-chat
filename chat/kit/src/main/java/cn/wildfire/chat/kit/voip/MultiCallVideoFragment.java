@@ -3,6 +3,7 @@ package cn.wildfire.chat.kit.voip;
 import android.content.Context;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.SurfaceView;
@@ -82,6 +83,7 @@ public class MultiCallVideoFragment extends Fragment implements AVEngineKit.Call
         }
 
         updateParticipantStatus(session);
+        updateCallDuration();
     }
 
     private void updateParticipantStatus(AVEngineKit.CallSession session) {
@@ -331,5 +333,23 @@ public class MultiCallVideoFragment extends Fragment implements AVEngineKit.Call
             }
         }
 
+    }
+
+    private Handler handler = new Handler();
+
+    private void updateCallDuration() {
+        AVEngineKit.CallSession session = getEngineKit().getCurrentSession();
+        if (session != null && session.getState() == AVEngineKit.CallState.Connected) {
+            long s = System.currentTimeMillis() - session.getConnectedTime();
+            s = s / 1000;
+            String text;
+            if (s > 3600) {
+                text = String.format("%d:%02d:%02d", s / 3600, (s % 3600) / 60, (s % 60));
+            } else {
+                text = String.format("%02d:%02d", s / 60, (s % 60));
+            }
+            durationTextView.setText(text);
+        }
+        handler.postDelayed(this::updateCallDuration, 1000);
     }
 }
