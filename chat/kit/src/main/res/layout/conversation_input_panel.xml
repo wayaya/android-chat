@@ -18,30 +18,34 @@
         <LinearLayout
             android:id="@+id/inputContainerLinearLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:animateLayoutChanges="true"
             android:focusableInTouchMode="true"
-            android:orientation="horizontal">
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp">
 
             <ImageView
                 android:id="@+id/audioImageView"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:layout_gravity="bottom"
-                android:layout_margin="5dp"
+                android:scaleType="centerInside"
                 android:src="@mipmap/ic_cheat_voice" />
 
             <RelativeLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:layout_weight="1"
                 android:gravity="center">
 
                 <EditText
                     android:id="@+id/editText"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="41dp"
                     android:layout_centerInParent="true"
                     android:background="@drawable/shape_session_text_input"
                     android:maxLines="5"
@@ -68,17 +72,14 @@
                 android:id="@+id/emotionImageView"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:layout_gravity="bottom"
-                android:layout_margin="5dp"
+                android:scaleType="centerInside"
                 android:src="@mipmap/ic_cheat_emo" />
 
             <ImageView
                 android:id="@+id/extImageView"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:layout_gravity="bottom"
-                android:layout_marginRight="5dp"
-                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="12dp"
                 android:scaleType="centerInside"
                 android:src="@mipmap/ic_cheat_add" />
 
@@ -87,9 +88,6 @@
                 style="?android:attr/borderlessButtonStyle"
                 android:layout_width="50dp"
                 android:layout_height="35dp"
-                android:layout_gravity="bottom"
-                android:layout_marginRight="5dp"
-                android:layout_marginBottom="2.5dp"
                 android:background="@drawable/shape_session_btn_send"
                 android:gravity="center"
                 android:text="@string/send"
@@ -125,7 +123,7 @@
             android:id="@+id/extContainerContainerLayout"
             android:layout_width="match_parent"
             android:layout_height="@dimen/default_custom_keyboard_size"
-            android:background="@color/white"
+            android:background="@color/gray5"
             android:visibility="gone">
 
             <!--其他功能-->
