@@ -16,6 +16,7 @@ import butterknife.BindView;
 import butterknife.OnClick;
 import butterknife.OnTextChanged;
 import cn.wildfire.chat.app.AppService;
+import cn.wildfire.chat.app.common.LogUtil;
 import cn.wildfire.chat.app.login.model.LoginResult;
 import cn.wildfire.chat.app.main.MainActivity;
 import cn.wildfire.chat.kit.ChatManagerHolder;
@@ -25,10 +26,13 @@ import cn.wildfirechat.chat.R;
 public class SMSLoginActivity extends WfcBaseNoToolbarActivity {
     @BindView(R.id.loginButton)
     Button loginButton;
+
     @BindView(R.id.phoneNumberEditText)
     EditText phoneNumberEditText;
+
     @BindView(R.id.authCodeEditText)
     EditText authCodeEditText;
+
     @BindView(R.id.requestAuthCodeButton)
     TextView requestAuthCodeButton;
 
@@ -43,6 +47,7 @@ public class SMSLoginActivity extends WfcBaseNoToolbarActivity {
     protected void afterViews() {
         setStatusBarTheme(this, false);
         setStatusBarColor(R.color.white);
+        LogUtil.printD("debug", "登录界面...");
     }
 
     @OnTextChanged(value = R.id.phoneNumberEditText, callback = OnTextChanged.Callback.AFTER_TEXT_CHANGED)
@@ -65,18 +70,20 @@ public class SMSLoginActivity extends WfcBaseNoToolbarActivity {
 
     @OnClick(R.id.loginButton)
     void login() {
+        LogUtil.printD("debug", "开始登录...");
         String phoneNumber = phoneNumberEditText.getText().toString().trim();
         String authCode = authCodeEditText.getText().toString().trim();
 
         loginButton.setEnabled(false);
+        // 显示登录弹窗
         MaterialDialog dialog = new MaterialDialog.Builder(this)
-            .content("登录中...")
-            .progress(true, 100)
-            .cancelable(false)
-            .build();
+                .content("登录中...")
+                .progress(true, 100)
+                .cancelable(false)
+                .build();
         dialog.show();
 
-
+        // 执行登录过程
         AppService.Instance().smsLogin(phoneNumber, authCode, new AppService.LoginCallback() {
             @Override
             public void onUiSuccess(LoginResult loginResult) {
@@ -88,9 +95,9 @@ public class SMSLoginActivity extends WfcBaseNoToolbarActivity {
                 ChatManagerHolder.gChatManager.connect(loginResult.getUserId(), loginResult.getToken());
                 SharedPreferences sp = getSharedPreferences("config", Context.MODE_PRIVATE);
                 sp.edit()
-                    .putString("id", loginResult.getUserId())
-                    .putString("token", loginResult.getToken())
-                    .apply();
+                        .putString("id", loginResult.getUserId())
+                        .putString("token", loginResult.getToken())
+                        .apply();
                 Intent intent = new Intent(SMSLoginActivity.this, MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);

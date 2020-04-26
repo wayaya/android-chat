@@ -3,12 +3,15 @@ package cn.wildfire.chat.app;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.google.gson.Gson;
+
 import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.wildfire.chat.app.common.LogUtil;
 import cn.wildfire.chat.app.login.model.LoginResult;
 import cn.wildfire.chat.app.login.model.PCSession;
 import cn.wildfire.chat.kit.AppServiceProvider;
@@ -80,7 +83,7 @@ public class AppService implements AppServiceProvider {
         //Platform_OSX = 4,
         //Platform_WEB = 5,
         //Platform_WX = 6,
-        params.put("platform", new Integer(2));
+        params.put("platform", 2);
 
         try {
             params.put("clientId", ChatManagerHolder.gChatManager.getClientId());
@@ -90,6 +93,8 @@ public class AppService implements AppServiceProvider {
             return;
         }
 
+        LogUtil.printD("debug", String.format("url:%s", url));
+        LogUtil.printD("debug", String.format("params:%s", new Gson().toJson(params)));
         OKHttpHelper.post(url, params, new SimpleCallback<LoginResult>() {
             @Override
             public void onUiSuccess(LoginResult loginResult) {
