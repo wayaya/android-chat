@@ -20,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import butterknife.ButterKnife;
+import cn.wildfire.chat.app.common.LogUtil;
 import cn.wildfire.chat.app.login.SMSLoginActivity;
 import cn.wildfirechat.chat.R;
 
@@ -31,14 +32,15 @@ public class SplashActivity extends AppCompatActivity {
     };
     private static final int REQUEST_CODE_DRAW_OVERLAY = 101;
 
+    @SuppressWarnings("FieldCanBeLocal")
     private SharedPreferences sharedPreferences;
     private String id;
     private String token;
 
     private void hideStatusBar() {
-        View decorView = getWindow().getDecorView();
+        View decorView = getWindow().getDecorView(); // 获取最顶层View
         // Hide the status bar.
-        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN; // 全屏显示覆盖掉状态栏
         decorView.setSystemUiVisibility(uiOptions);
     }
 
@@ -46,16 +48,21 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
-        setContentView(R.layout.activity_splash);
-        ButterKnife.bind(this);
+
+        LogUtil.printD("debug", "start...");
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS); // 允许使用过渡动画
+        setContentView(R.layout.activity_splash);  // 设定布局方式
+        ButterKnife.bind(this); // 绑定
         hideStatusBar();
 
+        // 获取配置文件
         sharedPreferences = getSharedPreferences("config", Context.MODE_PRIVATE);
         id = sharedPreferences.getString("id", null);
         token = sharedPreferences.getString("token", null);
 
+        // 检查权限
         if (checkPermission()) {
+            // 一秒后跳转到下一个视图
             new Handler().postDelayed(this::showNextScreen, 1000);
         } else {
             requestPermissions(permissions, 100);
@@ -89,6 +96,7 @@ public class SplashActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_DRAW_OVERLAY) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (!Settings.canDrawOverlays(this)) {
